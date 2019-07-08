@@ -5,25 +5,55 @@ if ( WEBGL.isWebGLAvailable() === false ) {
 
 THREE.Cache.enabled = true;
 var stlLoader = new THREE.STLLoader()
+var clock = new THREE.Clock();
 // Colored binary STL
 
 const stlfile = "models/object.stl"
-const colorfile = "models/temps.txt"
-
-var colormapController = {
-    colorMap: "grayscale",
-    MINcolor: 66.0,
-    MAXcolor: 77.0
+var colorfiles = {
+    low: {
+        file: "models/temps300.txt",
+        colorMap: "grayscale",
+        MINcolor: 68.0,
+        MAXcolor: 77.0
+    },
+    mid: {
+        file: "models/temps500.txt",
+        colorMap: "grayscale",
+        MINcolor: 78.0,
+        MAXcolor: 82.0
+    },
+    high:  {
+        file: "models/temps800.txt",
+        colorMap: "grayscale",
+        MINcolor: 90.0,
+        MAXcolor: 105.0
+    }
 };
-var colorMap = colormapController.colorMap;
-var MINcolor = colormapController.MINcolor;
-var MAXcolor = colormapController.MAXcolor;
+var colorfileController = {
+    downwelling: "low",
+    MINcolor: 75.0,
+    MAXcolor: 85.0
+};
+var downwelling = "mid"
+var colorfile = colorfiles[colorfileController.downwelling].file;
+console.log("colorfile: ",colorfile)
+    
+//var colormapController = {
+//    colorMap: "grayscale",
+////    MINcolor: 87.0,
+////    MAXcolor: 112.0
+//};
 
-var camera, stats, controls, scene, Geom, Material,Colors;
-var mesh, renderer,gui1, gui2;
+var colorMap = colorfiles[colorfileController.downwelling].colorMap;
+var MINcolor = colorfiles[colorfileController.downwelling].MINcolor;
+var MAXcolor = colorfiles[colorfileController.downwelling].MAXcolor;
+
+var camera, stats, controls, scene, Geom, Material, Colors;
+var mesh, renderer, gui1, gui2, gui3;
 
 var gui = new dat.GUI();
 
+// readings geometry //
 p1 = new Promise( (resolve) => {
 
     stlLoader.load( stlfile, function ( geometry ) {
@@ -32,8 +62,8 @@ p1 = new Promise( (resolve) => {
 
 } )
 
-
-p2 = new Promise( (resolve, reject) => {
+// reading surface colors //
+p2 = new Promise( function(resolve, reject) {
 
     var loader = new THREE.FileLoader();
     // var data;
@@ -57,16 +87,17 @@ p2 = new Promise( (resolve, reject) => {
         }
     );
 
-} )
+})
 
+// merging geometry and surface colors //
 p3 = new Promise( resolve => {
     p1.then( (geom) => {
-        p2.then( (colors) => {
+        p2.then( function(colors) {
             Colors = colors;
             var Length = geom.attributes.position.array.length/9
             lut = new THREE.Lut( colorMap, Length )
-            lut.setMax( colormapController.MAXcolor )
-            lut.setMin( colormapController.MINcolor )
+            lut.setMax( colorfiles[colorfileController.downwelling].MAXcolor )
+            lut.setMin( colorfiles[colorfileController.downwelling].MINcolor )
             var lutColors = []
             promises=[]
             for ( var i = 0; i < Length; i ++ ) {
@@ -99,7 +130,7 @@ p3 = new Promise( resolve => {
 
 function init(geom) {
     scene = new THREE.Scene();
-    scene.background = new THREE.Color( 0x555555 );
+    scene.background = new THREE.Color( 0x000 );
     // scene.fog = new THREE.FogExp2( 0xffffff, 0.00005 );
     // scene.fog = new THREE.Fog( 0xccddff, 50, 22 )
     renderer = new THREE.WebGLRenderer( { antialias: true } );
@@ -138,12 +169,12 @@ function init(geom) {
     scene.add( mesh );
 
     // lights
-    // var light = new THREE.DirectionalLight( 0xffffff ,1);
-    // light.position.set( 1, 1, 1 );
-    // scene.add( light );
-    // var light = new THREE.DirectionalLight( 0xffffff ,1 );
-    // light.position.set( - 1, - 1, - 1 );
-    // scene.add( light );
+//     var light = new THREE.DirectionalLight( 0xffffff ,1);
+//     light.position.set( 1, 1, 1 );
+//     scene.add( light );
+//     var light = new THREE.DirectionalLight( 0xffffff ,1 );
+//     light.position.set( - 1, - 1, - 1 );
+//     scene.add( light );
     var light = new THREE.AmbientLight( 0xffffff, 1 );
     scene.add( light );
 
@@ -155,7 +186,7 @@ function init(geom) {
     // GUI
     setupGui();
     window.addEventListener( 'resize', onWindowResize, false );
-    // document.addEventListener( 'mousedown', onDocumentMouseDown, false );
+//    document.addEventListener( 'mousedown', onDocumentMouseDown, false );
 }
 
 
@@ -183,7 +214,7 @@ function init(geom) {
 
 function createFloor() {
     var geometry = new THREE.PlaneBufferGeometry( 100000, 100000 );
-    var material = new THREE.MeshToonMaterial( {color: 0x111111} );
+    var material = new THREE.MeshToonMaterial( {color: 0x111} );
     var plane = new THREE.Mesh( geometry, material );
     plane.position.z = -60;
     scene.add( plane );
@@ -205,10 +236,10 @@ function textTotemps(tempsText){
 
 function setupGui() {
     gui1 = gui.add( Material, 'wireframe' );
-    gui2 = gui.add( colormapController, "colorMap", [ "grayscale", "rainbow", "cooltowarm", "blackbody" ] ).name( "color map" ).onChange( render );
-    gui.add( colormapController, 'MINcolor', 20, 100 ).step( .1 ).name( 'Minimum color' ).onChange( render );
-    gui.add( colormapController, 'MAXcolor', 40, 120 ).step( .1 ).name( 'Maximum color' ).onChange( render );
-
+    gui2 = gui.add( colorfiles[colorfileController.downwelling], "colorMap", [ "grayscale", "rainbow", "cooltowarm", "blackbody" ] ).name( "color map" ).onChange( render );
+    gui.add( colorfiles[colorfileController.downwelling], 'MINcolor', 20, 130 ).step( .1 ).name( 'Minimum color' ).onChange( render );
+    gui.add( colorfiles[colorfileController.downwelling], 'MAXcolor', 40, 150 ).step( .1 ).name( 'Maximum color' ).onChange( render );
+    gui3 = gui.add( colorfileController, "downwelling", [ "low", "mid", "high"] ).name( "DownWelling" ).onChange( render );
 }
 
 function onWindowResize() {
@@ -216,6 +247,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
+
 function animate() {
     requestAnimationFrame( animate );
     controls.update(); // only required if controls.enableDamping = true, or if controls.autoRotate = true
@@ -224,33 +256,67 @@ function animate() {
 }
 
 function render() {
-    if (colormapController.colorMap !== colorMap) {
-        colorMap = colormapController.colorMap;
+    if (colorfiles[colorfileController.downwelling].colorMap !== colorMap) {
+        colorMap = colorfiles[colorfileController.downwelling].colorMap;
         if ( mesh !== undefined ) {
-            createNewScene(Geom)
+            createNewScene(Geom, Colors)
         }
     }
 
-    if (colormapController.MINcolor !== MINcolor) {
-        MINcolor = colormapController.MINcolor
+    if (colorfiles[colorfileController.downwelling].MINcolor !== MINcolor) {
+        MINcolor = colorfiles[colorfileController.downwelling].MINcolor
         if ( mesh !== undefined ) {
-            createNewScene(Geom)
+            createNewScene(Geom, Colors)
+        } 
+    }
+
+    if (colorfiles[colorfileController.downwelling].MAXcolor !== MAXcolor) {
+        MAXcolor = colorfiles[colorfileController.downwelling].MAXcolor
+        if ( mesh !== undefined ) {
+            createNewScene(Geom, Colors)
         }
     }
 
-    if (colormapController.MAXcolor !== MAXcolor) {
-        MAXcolor = colormapController.MAXcolor
-        if ( mesh !== undefined ) {
-            createNewScene(Geom)
-        }
+    if (colorfiles[colorfileController.downwelling].file !== colorfile) {
+        colorfile = colorfiles[colorfileController.downwelling].file
+        MINcolor = colorfiles[colorfileController.downwelling].MINcolor
+        MAXcolor = colorfiles[colorfileController.downwelling].MAXcolor
+        colorMap = colorfiles[colorfileController.downwelling].colorMap;
+
+        // reading surface colors //
+        p2 = new Promise( function(resolve, reject) {
+
+            var loader = new THREE.FileLoader();
+            // var data;
+            //load a text file and output the result to the console
+            loader.load(
+                // resource URL
+                colorfile,
+                // onLoad callback
+                function ( data ) {
+                    var fahrenheit = textTotemps(data)
+                    resolve( fahrenheit )
+                },
+                // onProgress callback
+                function ( xhr ) {
+                    console.log( (xhr.loaded / xhr.total * 100) + '% loaded' );
+                },
+                // onError callback
+                function ( err ) {
+                    reject(err)
+                    console.error( 'An error happened' );
+                }
+            );
+
+        })
+        p2.then( Colors => {
+            if ( mesh !== undefined ) {
+                createNewScene(Geom,Colors)
+            }
+        } )
     }
-
-    // camera.updateProjectionMatrix();
-    // var vector = camera.position.clone();
-    // console.log(vector)
-    // var vector = camera.rotation.clone();
-    // console.log(vector)
-
+    
+        
     renderer.render( scene, camera );
 }
 
@@ -262,37 +328,34 @@ p3.then( geom => {
 
 
 
-function createNewScene(geom) {
+function createNewScene(geom,Colors) {
     mesh.geometry.dispose();
     scene.remove( mesh );
-    p_update = new Promise(resolve => {
-        var Length = geom.attributes.position.array.length/9
-        lut = new THREE.Lut( colorMap, Length )
-        lut.setMax( colormapController.MAXcolor )
-        lut.setMin( colormapController.MINcolor )
-        var lutColors = []
-        promises=[]
-        for ( var i = 0; i < Length; i ++ ) {
-            p = new Promise( r => {
-                var color = lut.getColor( Colors[i] );
-                for ( var j = 0; j < 3; j ++ ) {
-                    // var color = lut.getColor( geom.attributes.position.array[9*i+3*j+2] );
-                    // console.log(Colors[i])
-                    lutColors.push(color.r)
-                    lutColors.push(color.g)
-                    lutColors.push(color.b)
-                    geom.attributes.color.array[9*i+3*j+0] = color.r
-                    geom.attributes.color.array[9*i+3*j+1] = color.g
-                    geom.attributes.color.array[9*i+3*j+2] = color.b
+            p_update = new Promise(resolve => {
+                var Length = geom.attributes.position.array.length/9
+                lut = new THREE.Lut( colorMap, Length )
+                lut.setMax(colorfiles[colorfileController.downwelling].MAXcolor)
+                lut.setMin(colorfiles[colorfileController.downwelling].MINcolor)
+                var lutColors = []
+                promises=[]
+                for ( var i = 0; i < Length; i ++ ) {
+                    p = new Promise( r => {
+                        var color = lut.getColor( Colors[i] );
+                        for ( var j = 0; j < 3; j ++ ) {
+                            lutColors.push(color.r)
+                            lutColors.push(color.g)
+                            lutColors.push(color.b)
+                            geom.attributes.color.array[9*i+3*j+0] = color.r
+                            geom.attributes.color.array[9*i+3*j+1] = color.g
+                            geom.attributes.color.array[9*i+3*j+2] = color.b
+                        }
+                        r()
+                    })
+                    promises.push(p)
                 }
-                r()
-            })
-            promises.push(p)
-        }
-        Promise.all(promises).then(()=>{
-            // geom.addAttribute( 'color', new THREE.Float32BufferAttribute( lutColors, 3 ) );
-            resolve(geom)
-        })
+                Promise.all(promises).then(()=>{
+                    resolve(geom)
+                })
     })
 
     p_update.then(geom => {
@@ -301,4 +364,8 @@ function createNewScene(geom) {
     })
 
 }
+
+
+
+
 
