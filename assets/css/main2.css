@@ -1,0 +1,98 @@
+body {
+	margin: 0;
+	background-color: #000;
+	color: #ddd;
+	font-family: monospace,Sans-Serif;
+    font-size: 18px;
+    font-weight: 700;
+	line-height: 22px;
+}
+
+a {
+	color: #777;
+	text-decoration: none;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+button {
+	cursor: pointer;
+	text-transform: uppercase;
+}
+
+canvas {
+	display: block;
+}
+
+#info {
+	position: absolute;
+	top: 0px;
+	width: 100%;
+	padding: 5px;
+	box-sizing: border-box;
+	text-align: center;
+	/* z-index: 1; TODO Solve this in HTML */
+}
+
+
+#footer {
+	position: absolute;
+	bottom: 0px;
+	width: 100%;
+    padding: 5px;
+    color: #777;
+	box-sizing: border-box;
+    text-align: center;
+    font-family: sans-serif;
+	font-size: 13px;
+	line-height: 18px;
+}
+
+.author {
+    color: #ddd;
+    font-family: sans-serif;
+	font-size: 13px;
+	font-weight: 700;
+}
+.resource {
+    text-decoration: underline;
+}
+
+#databox {
+	position: absolute;
+	top: 60px;
+	width: 100%;
+    padding: 10px;
+}
+
+.rect {
+    fill: #333;
+    stroke: #555;
+    stroke-width: 1;
+    opacity: 0.95;
+}
+
+.recttext {
+    position: relative;
+    font-family: sans-serif;
+    font-size: 13px;
+    fill: #eee;
+    text-align: center;
+}
+
+.rectvalue {
+    position: relative;
+    font-family: sans-serif;
+    font-size: 26px;
+    fill: #FF5733;
+    text-align: center;
+}
+.datasymbol {
+    /* position: relative; */
+    font-family: "Lucida Console", 'Monac';
+    font-size: 22px;
+    fill: #eee;
+    text-align: center;
+}
