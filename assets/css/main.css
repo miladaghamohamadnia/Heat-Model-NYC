@@ -233,12 +233,12 @@ button:focus {
     border-radius: 100%;
     font-size: 20px;
     margin: 0px 0px 0px 0px;
-    padding-top: 5px;
+    padding-top: 7px;
     margin: 15px 6px 12px 6px;
-    transition: all 0.3s ease-in-out 0s;
-    -moz-transition: all 0.3s ease-in-out 0s;
-    -webkit-transition: all 0.3s ease-in-out 0s;
-    -o-transition: all 0.3s ease-in-out 0s;
+    transition: all 0.2s ease-in-out 0s;
+    -moz-transition: all 0.2s ease-in-out 0s;
+    -webkit-transition: all 0.2s ease-in-out 0s;
+    -o-transition: all 0.2s ease-in-out 0s;
 }
 
 
